@@ -29,7 +29,7 @@ def show_category(category_id):
     category = Category.query.get_or_404(category_id)
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config['BLOG_POST_PER_PAGE']
-    pagination = Post.query.with_parent(category).filter_by(reviewed=True).order_by(Post.timestamp.desc()).paginate(
+    pagination = Post.query.with_parent(category).order_by(Post.timestamp.desc()).paginate(
         page=page, per_page=per_page)
     posts = pagination.items
     return render_template('blog/category.html', pagination=pagination, posts=posts, category=category)
@@ -40,8 +40,9 @@ def show_post(post_id):
     post = Post.query.get_or_404(post_id)
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config['BLOG_COMMENT_PER_PAGE']
-    pagination = Comment.query.with_parent(post).order_by(Comment.timestamp.desc()).paginate(page=page,
-                                                                                             per_page=per_page)
+    pagination = Comment.query.with_parent(post).filter_by(reviewed=True).order_by(Comment.timestamp.desc()).paginate(
+        page=page,
+        per_page=per_page)
     comments = pagination.items
 
     if current_user.is_authenticated:
@@ -83,8 +84,11 @@ def show_post(post_id):
 @blog_bp.route('/reply/comment/<int:comment_id>')
 def reply_comment(comment_id):
     comment = Comment.query.get_or_404(comment_id)
-    return redirect(
-        url_for('.show_post', post_id=comment.post_id, reply=comment_id, author=comment.author) + '#comment-form')
+    if comment.post.can_comment:
+        return redirect(
+            url_for('.show_post', post_id=comment.post_id, reply=comment_id, author=comment.author) + '#comment-form')
+    flash('这篇博客禁止评论', 'danger')
+    return redirect_back()
 
 
 @blog_bp.route('/change-theme/<theme_name>')
@@ -95,8 +99,7 @@ def change_theme(theme_name):
     response.set_cookie('theme', theme_name, max_age=60 * 60 * 24 * 30)
     return response
 
-
-@blog_bp.route('/post_slug/<slug>')
-def show_post_slug(slug):
-    post = Post.query.fliter_by(slug=slug).first_or_404()
-    return render_template('blog/post.html', post=post)
+# @blog_bp.route('/post_slug/<slug>')
+# def show_post_slug(slug):
+#     post = Post.query.filter_by(slug=slug).first_or_404()
+#     return render_template('blog/post.html', post=post)

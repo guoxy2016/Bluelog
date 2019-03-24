@@ -19,6 +19,7 @@ class BaseConfig:
     BLOG_POST_PER_PAGE = 10
     BLOG_MANAGE_POST_PER_PAGE = 15
     BLOG_COMMENT_PER_PAGE = 15
+    BLOG_MANAGE_COMMENT_PER_PAGE = 15
 
     BLOG_THEMES = {'default': '默认', 'lux': 'LUX', 'darkly': 'Darkly', 'cerulean': 'Cerulean', 'litera': 'Litera'}
 

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% from 'bootstrap/form.html' import render_form %}
+
+{% block title %}编辑-分类{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>编辑分类</h1>
+    </div>
+    {{ render_form(form) }}
+{% endblock %}
+

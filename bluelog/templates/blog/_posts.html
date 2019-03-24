@@ -19,9 +19,17 @@
     {% endfor %}
 {% else %}
     <div class="tip">
-        <h5>没有博客</h5>
-        {% if current_user.is_authenticated %}
-            <a href="{{ url_for('admin.new_post') }}">写一份</a>
+        {% if category %}
+            <h5>这个分类下没有博客</h5>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('admin.new_post', category=category.id) }}">写一份</a>
+            {% endif %}
+        {% else %}
+            <h5>没有博客</h5>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('admin.new_post') }}">写一份</a>
+            {% endif %}
         {% endif %}
+
     </div>
 {% endif %}

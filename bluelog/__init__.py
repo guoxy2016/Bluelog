@@ -2,8 +2,9 @@ import os
 
 import click
 from flask import Flask, render_template
+from flask_login import current_user
 
-from bluelog.extensions import db, mail, moment, bootstrap, ckeditor, migrate, login_manager
+from bluelog.extensions import db, mail, moment, bootstrap, ckeditor, migrate, login_manager, csrf
 from bluelog.models import Admin, Category, Comment, Post
 from bluelog.settings import config
 
@@ -38,6 +39,7 @@ def register_extensions(app=None):
     bootstrap.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    csrf.init_app(app)
 
 
 def register_blueprints(app=None):
@@ -61,21 +63,25 @@ def register_template_context(app=None):
     def make_template_context():
         admin = Admin.query.first()
         categories = Category.query.all()
-        return dict(admin=admin, categories=categories)
+        if current_user.is_authenticated:
+            unread_comments = Comment.query.filter_by(reviewed=False).count()
+        else:
+            unread_comments = None
+        return dict(admin=admin, categories=categories, unread_comments=unread_comments)
 
 
 def register_errors(app=None):
     @app.errorhandler(400)
     def unauthorized(e):
-        return render_template('error/400.html')
+        return render_template('error/400.html', description=e.description), 400
 
     @app.errorhandler(404)
     def notfound(e):
-        return render_template('error/404.html')
+        return render_template('error/404.html'), 404
 
     @app.errorhandler(500)
     def servererror(e):
-        return render_template('error/500.html')
+        return render_template('error/500.html'), 500
 
 
 def register_commends(app=None):

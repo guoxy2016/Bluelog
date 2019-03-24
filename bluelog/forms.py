@@ -15,9 +15,9 @@ class LoginForm(FlaskForm):
 
 class PostForm(FlaskForm):
     title = StringField('标题', validators=[DataRequired('请输入标题'), Length(1, 30, '标题长度范围在1-30之间')])
-    slug = StringField('slug', validators=[Optional(), Length(0, 80, 'slug的长度不超过80个ASCII字符')])
-    body = CKEditorField('内容', validators=[DataRequired('请输入内容')])
+    # slug = StringField('slug', validators=[Optional(), Length(0, 80, 'slug的长度不超过80个ASCII字符')])
     category = SelectField('分类', coerce=int, default=1)
+    body = CKEditorField('内容', validators=[DataRequired('请输入内容')])
     submit = SubmitField('提交')
 
     def __init__(self, *args, **kwargs):
@@ -25,21 +25,24 @@ class PostForm(FlaskForm):
         self.category.choices = [(category.id, category.name) for category in
                                  Category.query.order_by(Category.name).all()]
 
-    def validate_slug(self, field):
-        if Post.query.filter_by(slug=field.data).first():
-            raise ValidationError('slug以存在')
-        for word in field.data:
-            if ord(word) > 128:
-                raise ValidationError('不支持非ascii字符')
+    # def validate_slug(self, field):
+    #     if Post.query.filter_by(slug=field.data).first():
+    #         raise ValidationError('slug以存在')
+    #     for word in field.data:
+    #         if ord(word) > 128:
+    #             raise ValidationError('不支持非ascii字符')
 
 
-class CategoryForm(FlaskForm):
-    name = StringField('类型', validators=[DataRequired('请输入类型名'), Length(1, 30, '类型名的长度范围在1-30之间')])
+class UpdateCategoryForm(FlaskForm):
+    name = StringField('分类', validators=[DataRequired('请输入分类名'), Length(1, 30, '分类名的长度范围在1-30之间')])
     submit = SubmitField('提交')
+
+
+class CategoryForm(UpdateCategoryForm):
 
     def validate_name(self, field):
         if Category.query.filter_by(name=field.data).first():
-            raise ValidationError('类型名以存在')
+            raise ValidationError('分类以存在')
 
 
 class CommentForm(FlaskForm):
@@ -54,3 +57,11 @@ class AdminCommentForm(CommentForm):
     author = HiddenField()
     email = HiddenField()
     site = HiddenField()
+
+
+class SettingForm(FlaskForm):
+    name = StringField('姓名', validators=[DataRequired('输入姓名'), Length(1, 30, '姓名的长度只支持30个字')])
+    blog_title = StringField('博客名称', validators=[DataRequired('请输入名称'), Length(1, 60, '名称的长度最多60个字')])
+    blog_sub_title = StringField('博客副标题', validators=[DataRequired('请输入名称'), Length(1, 100, '副标题最多100个字')])
+    about = CKEditorField('关于', validators=[DataRequired('请填写内容')])
+    submit = SubmitField('提交')

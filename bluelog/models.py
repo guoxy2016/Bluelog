@@ -17,7 +17,7 @@ class Admin(db.Model, UserMixin):
 
     about = db.Column(db.TEXT)
 
-    def check_password(self, password):
+    def validate_password(self, password):
         return check_password_hash(self._password_hash, password)
 
     @property
@@ -37,6 +37,14 @@ class Category(db.Model):
     name = db.Column(db.String(30), unique=True)
     posts = db.relationship('Post', back_populates='category')
 
+    def delete(self):
+        default_category = Category.query.get(1)
+        posts = self.posts.copy()
+        for post in posts:
+            post.category = default_category
+        db.session.delete(self)
+        db.session.commit()
+
     def __repr__(self):
         return '<Category %r>' % self.name
 
@@ -45,7 +53,8 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(30))
     body = db.Column(db.Text)
-    slug = db.Column(db.String(40), unique=True)
+    # slug = db.Column(db.String(40), unique=True)
+    can_comment = db.Column(db.Boolean, default=True)
 
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     category = db.relationship('Category', back_populates='posts')

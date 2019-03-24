@@ -107,3 +107,4 @@ venv.bak/
 
 # IntelliJ project files
 .idea/
+/data-dev.sqlite3

@@ -12,11 +12,10 @@ fake = Faker('zh_CN')
 def fake_admin():
     admin = Admin(
         username='admin',
-        blog_title='GuoBlog',
-        blog_sub_title='我的第一个技术博客网站',
-        name='郭星宇',
-        about='这是一个使用开放源代码编写的技术博客网站, 网站中的内容是自己平时在coding中总结的经验, '
-              '如果你觉得对你有所帮助的话, 那就是对我最大的鼓励.'
+        blog_title='Blog',
+        blog_sub_title='博客网站',
+        name='Vim',
+        about='关于我自己, 写网站就好了'
     )
     admin.password = 'helloflask'
     db.session.add(admin)
@@ -78,10 +77,11 @@ def fake_comment(count=500):
     db.session.commit()
 
     # admin回复
+    admin = Admin.query.first()
     for i in range(salt):
         comment = Comment(
-            author='郭星宇',
-            email='guoxy_mail@163.com',
+            author=admin.name,
+            email='admin@example.com',
             site='example.com',
             body=fake.sentence(),
             from_admin=True,
