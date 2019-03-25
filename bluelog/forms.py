@@ -3,7 +3,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, TextAreaField, HiddenField
 from wtforms.validators import DataRequired, InputRequired, Length, ValidationError, Email, URL, Optional
 
-from bluelog.models import Category, Post
+from bluelog.models import Category
 
 
 class LoginForm(FlaskForm):
@@ -57,6 +57,12 @@ class AdminCommentForm(CommentForm):
     author = HiddenField()
     email = HiddenField()
     site = HiddenField()
+
+
+class LinkForm(FlaskForm):
+    name = StringField('连接名', validators=[DataRequired('输入名称'), Length(1, 20, '连接名不超过20个字')])
+    url = StringField('URL地址', validators=[DataRequired('输入URL'), URL(False, '连接格式不规范'), Length(1, 255, '不支持超过255个字符的连接')])
+    submit = SubmitField('提交')
 
 
 class SettingForm(FlaskForm):

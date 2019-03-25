@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}管理-连接{% endblock %}
+
+
+{% block content %}
+    <div class="page-header">
+        <h1>连接
+            <span class="float-right"><a class="btn btn-primary btn-sm" href="{{ url_for('.new_link') }}">添加连接</a></span>
+        </h1>
+    </div>
+    {% if links %}
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>序号</th>
+                <th>名称</th>
+                <th>url</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            {% for link in links %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ link.name }}</td>
+                    <td><a href="{{ link.url }}" target="_blank">{{ link.url }}</a></td>
+                    <td>
+                        <a class="btn btn-info btn-sm" href="{{ url_for('.editor_link', link_id=link.id) }}">编辑</a>
+                        <form class="inline" method="post" action="{{ url_for('.delete_link', link_id=link.id, next=request.full_path) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('确定删除吗?');">删除</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <div class="tip"><h5>没有连接</h5></div>
+    {% endif %}
+{% endblock %}

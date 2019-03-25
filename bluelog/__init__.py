@@ -5,7 +5,7 @@ from flask import Flask, render_template
 from flask_login import current_user
 
 from bluelog.extensions import db, mail, moment, bootstrap, ckeditor, migrate, login_manager, csrf
-from bluelog.models import Admin, Category, Comment, Post
+from bluelog.models import Admin, Category, Comment, Post, Link
 from bluelog.settings import config
 
 
@@ -63,11 +63,12 @@ def register_template_context(app=None):
     def make_template_context():
         admin = Admin.query.first()
         categories = Category.query.all()
+        links = Link.query.all()
         if current_user.is_authenticated:
             unread_comments = Comment.query.filter_by(reviewed=False).count()
         else:
             unread_comments = None
-        return dict(admin=admin, categories=categories, unread_comments=unread_comments)
+        return dict(admin=admin, categories=categories, unread_comments=unread_comments, links=links)
 
 
 def register_errors(app=None):
@@ -91,7 +92,7 @@ def register_commends(app=None):
     @click.option('--comment', default=500, help='Quantity of comment, default is 500.')
     def forge(category, post, comment):
         """Generates the fake categories, post, and comments."""
-        from bluelog.fakes import fake_admin, fake_category, fake_post, fake_comment
+        from bluelog.fakes import fake_admin, fake_category, fake_post, fake_comment, fake_link
         db.drop_all()
         db.create_all()
 
@@ -106,6 +107,9 @@ def register_commends(app=None):
 
         click.echo('Generating %s comments' % comment)
         fake_comment(comment)
+
+        click.echo('Generating links')
+        fake_link()
 
         click.echo('Done!')
 

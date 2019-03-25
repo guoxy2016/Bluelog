@@ -36,6 +36,7 @@
                             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 <a class="dropdown-item" href="{{ url_for('admin.new_post') }}">博客</a>
                                 <a class="dropdown-item" href="{{ url_for('admin.new_category') }}">分类</a>
+                                <a class="dropdown-item" href="{{ url_for('admin.new_link') }}">连接</a>
                             </div>
                         </li>
                         <li class="nav-item dropdown">
@@ -53,6 +54,7 @@
                                     <span class="badge badge-info">{{ unread_comments }}</span>
                                 {% endif %}
                                 </a>
+                                <a class="dropdown-item" href="{{ url_for('admin.manage_link') }}">连接</a>
                             </div>
                         </li>
                         {{ render_nav_item('admin.settings', '设置') }}

@@ -2,8 +2,8 @@ from flask import Blueprint, render_template, flash, request, current_app, redir
 from flask_login import login_required, current_user
 
 from bluelog.extensions import db
-from bluelog.forms import SettingForm, PostForm, CategoryForm, UpdateCategoryForm
-from bluelog.models import Post, Category, Comment
+from bluelog.forms import SettingForm, PostForm, CategoryForm, UpdateCategoryForm, LinkForm
+from bluelog.models import Post, Category, Comment, Link
 from bluelog.utils import redirect_back
 
 admin_bp = Blueprint('admin', __name__)
@@ -180,4 +180,49 @@ def approve_comment(comment_id):
     comment.reviewed = True
     db.session.commit()
     flash('评论通过', 'success')
+    return redirect_back()
+
+
+@admin_bp.route('/link/manage')
+@login_required
+def manage_link():
+    return render_template('admin/manage_link.html')
+
+
+@admin_bp.route('link/new', methods=['GET', 'POST'])
+@login_required
+def new_link():
+    form = LinkForm()
+    if form.validate_on_submit():
+        link = Link(name=form.name.data, url=form.url.data)
+        db.session.add(link)
+        db.session.commit()
+        flash('添加连接成功', 'success')
+        return redirect(url_for('.manage_link'))
+    return render_template('admin/new_link.html', form=form)
+
+
+@admin_bp.route('link/<int:link_id>/editor', methods=['GET', 'POST'])
+@login_required
+def editor_link(link_id):
+    link = Link.query.get_or_404(link_id)
+    form = LinkForm()
+    if form.validate_on_submit():
+        link.name = form.name.data
+        link.url = form.url.data
+        db.session.commit()
+        flash('连接修改成功', 'success')
+        return redirect(url_for('.manage_link'))
+    form.name.data = link.name
+    form.url.data = link.url
+    return render_template('admin/edit_link.html', form=form)
+
+
+@admin_bp.route('link/<int:link_id>delete', methods=['GET', 'POST'])
+@login_required
+def delete_link(link_id):
+    link = Link.query.get_or_404(link_id)
+    db.session.delete(link)
+    db.session.commit()
+    flash('连接已删除', 'success')
     return redirect_back()
