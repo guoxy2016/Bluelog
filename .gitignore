@@ -110,3 +110,4 @@ venv.bak/
 data-dev.sqlite3
 uploads/*
 !uploads/.gitkeep
+Pipfile.lock
