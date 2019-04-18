@@ -1,10 +1,13 @@
-from flask import Blueprint, render_template, flash, request, current_app, redirect, url_for
+import os
+
+from flask import Blueprint, render_template, flash, request, current_app, redirect, url_for, send_from_directory
+from flask_ckeditor import upload_fail, upload_success
 from flask_login import login_required, current_user
 
 from bluelog.extensions import db
 from bluelog.forms import SettingForm, PostForm, CategoryForm, UpdateCategoryForm, LinkForm
 from bluelog.models import Post, Category, Comment, Link
-from bluelog.utils import redirect_back
+from bluelog.utils import redirect_back, allowed_file
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -226,3 +229,19 @@ def delete_link(link_id):
     db.session.commit()
     flash('连接已删除', 'success')
     return redirect_back()
+
+
+@admin_bp.route('/upload/<path:filepath>')
+def get_upload(filepath):
+    return send_from_directory(current_app.config['BLOG_UPLOAD_PATH'], filename=filepath)
+
+
+@admin_bp.route('/upload', methods=['POST'])
+@login_required
+def upload_image():
+    f = request.files.get('upload')
+    if not allowed_file(f.filename):
+        return upload_fail('只能上传jpg, jpeg, gif, png格式的图片')
+    f.save(os.path.join(current_app.config['BLOG_UPLOAD_PATH'], f.filename))
+    url = url_for('.get_upload', filepath=f.filename)
+    return upload_success(url, f.filename)

@@ -2,8 +2,9 @@
 {% from 'bootstrap/form.html' import render_form %}
 
 {% block head %}
-{{ super() }}
-        <script src="{{ url_for('static', filename='ckeditor/ckeditor.js') }}"></script>
+    {{ super() }}
+    <script src="{{ url_for('static', filename='ckeditor/ckeditor.js') }}"></script>
+{#    {{ ckeditor.load() }}#}
 {% endblock %}
 
 {% block title %}编辑-博客{% endblock %}
@@ -15,3 +16,7 @@
     {{ render_form(form) }}
 {% endblock %}
 
+{% block scripts %}
+    {{ super() }}
+    {{ ckeditor.config(name='body') }}
+{% endblock %}

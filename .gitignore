@@ -107,4 +107,6 @@ venv.bak/
 
 # IntelliJ project files
 .idea/
-/data-dev.sqlite3
+data-dev.sqlite3
+uploads/*
+!uploads/.gitkeep

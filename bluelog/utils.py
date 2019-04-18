@@ -1,7 +1,7 @@
 import re
 from urllib.parse import urlparse, urljoin
 
-from flask import request, redirect, url_for
+from flask import request, redirect, url_for, current_app
 from unidecode import unidecode
 
 _prev_re = re.compile(r'[ \t`~!@#$%^&*()+={}:"<>?\\\[\]\';/.,]')
@@ -27,3 +27,7 @@ def slugify(text, sep='-'):
     for word in _prev_re.split(text.lower()):
         result.extend(unidecode(word).lower().split())
     return sep.join(result)
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.')[-1] in current_app.config['BLOG_ALLOW_EXTENSIONS']

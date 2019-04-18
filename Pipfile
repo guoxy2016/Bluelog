@@ -21,6 +21,3 @@ unidecode = "*"
 flask-migrate = "*"
 pymysql = "*"
 flask-login = "*"
-
-[requires]
-python_version = "3.7"

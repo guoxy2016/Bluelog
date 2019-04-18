@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 {% from 'bootstrap/form.html' import render_form %}
 
+{% block head %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='ckeditor/ckeditor.js') }}"></script>
+{#    {{ ckeditor.load() }}#}
+{% endblock %}
+
 {% block title %}设置{% endblock %}
 
 {% block content %}
@@ -12,5 +18,5 @@
 
 {% block scripts %}
     {{ super() }}
-    <script type="text/javascript" src="{{ url_for('static', filename='ckeditor/ckeditor.js') }}"></script>
+    {{ ckeditor.config(name='about') }}
 {% endblock %}

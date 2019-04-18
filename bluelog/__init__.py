@@ -3,6 +3,7 @@ import os
 import click
 from flask import Flask, render_template
 from flask_login import current_user
+from flask_wtf.csrf import CSRFError
 
 from bluelog.extensions import db, mail, moment, bootstrap, ckeditor, migrate, login_manager, csrf
 from bluelog.models import Admin, Category, Comment, Post, Link
@@ -74,7 +75,7 @@ def register_template_context(app=None):
 def register_errors(app=None):
     @app.errorhandler(400)
     def unauthorized(e):
-        return render_template('error/400.html', description=e.description), 400
+        return render_template('error/400.html'), 400
 
     @app.errorhandler(404)
     def notfound(e):
@@ -84,8 +85,23 @@ def register_errors(app=None):
     def servererror(e):
         return render_template('error/500.html'), 500
 
+    @app.errorhandler(CSRFError)
+    def csrferror(e):
+        return render_template('error/400.html', descraption=e.description), 400
+
 
 def register_commends(app=None):
+    @app.cli.command()
+    @click.option('--drop', is_flag=True, help='Create after drop.')
+    def initdb(drop):
+        """Initialize the database."""
+        if drop:
+            click.confirm('This operation will delete the database, do you want to continue?', abort=True)
+            db.drop_all()
+            click.echo('Drop tables.')
+        db.create_all()
+        click.echo('Initialized database.')
+
     @app.cli.command(name='forge')
     @click.option('--category', default=10, help='Quantity of category. default is 10.')
     @click.option('--post', default=50, help='Quantity of post, default is 50.')
@@ -114,15 +130,10 @@ def register_commends(app=None):
         click.echo('Done!')
 
     @app.cli.command(name='init')
-    @click.option('--drop_db', is_flag=True, help='before create database drop all data')
-    @click.option('--username', prompt=True, help='Quantity of user, use to login')
+    @click.option('--username', prompt=True, help='Quantity of user for login')
     @click.option('--password', prompt=True, hide_input=True, confirmation_prompt=True,
-                  help='Quantity of user\'s password, use to login')
-    def init(drop_db, username, password):
-        if drop_db:
-            click.confirm('Drop it', abort=True)
-            db.drop_all()
-            click.echo('All data was deleted')
+                  help='Quantity of user\'s password for login')
+    def init(username, password):
         db.create_all()
 
         admin = Admin.query.first()

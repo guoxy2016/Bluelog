@@ -4,9 +4,13 @@ basedir = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 
 
 class BaseConfig:
-    SECRET_KEY = os.getenv('SECRET_KEY', 'development secret key')
+    SECRET_KEY = 'secret key'
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    CKEDITOR_ENABLE_CSRF = True
+    CKEDITOR_SERVE_LOCAL = True
+    CKEDITOR_FILE_UPLOADER = 'admin.upload_image'
 
     MAIL_SERVER = os.getenv('MAIL_SERVER')
     MAIL_PORT = 465
@@ -23,6 +27,9 @@ class BaseConfig:
 
     BLOG_THEMES = {'default': '默认', 'lux': 'LUX', 'darkly': 'Darkly', 'cerulean': 'Cerulean', 'litera': 'Litera'}
 
+    BLOG_UPLOAD_PATH = os.path.join(basedir, 'uploads')
+    BLOG_ALLOW_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif']
+
 
 class DevelopConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'data-dev.sqlite3')
@@ -35,7 +42,8 @@ class TestingConfig(BaseConfig):
 
 
 class ProductConfig(BaseConfig):
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'data.sqlite3')
+    SECRET_KEY = os.getenv('SECRET_KEY', os.urandom(32))
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI') or 'sqlite:///' + os.path.join(basedir, 'data.sqlite3')
 
 
 config = {
