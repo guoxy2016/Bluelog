@@ -74,26 +74,26 @@ def register_template_context(app=None):
 
 def register_errors(app=None):
     @app.errorhandler(400)
-    def unauthorized(e):
+    def bad_required(_):
         return render_template('error/400.html'), 400
 
     @app.errorhandler(404)
-    def notfound(e):
+    def not_found(_):
         return render_template('error/404.html'), 404
 
     @app.errorhandler(500)
-    def servererror(e):
+    def server_error(_):
         return render_template('error/500.html'), 500
 
     @app.errorhandler(CSRFError)
-    def csrferror(e):
+    def csrf_error(e):
         return render_template('error/400.html', descraption=e.description), 400
 
 
 def register_commends(app=None):
     @app.cli.command()
     @click.option('--drop', is_flag=True, help='Create after drop.')
-    def initdb(drop):
+    def init_db(drop):
         """Initialize the database."""
         if drop:
             click.confirm('This operation will delete the database, do you want to continue?', abort=True)
@@ -102,7 +102,7 @@ def register_commends(app=None):
         db.create_all()
         click.echo('Initialized database.')
 
-    @app.cli.command(name='forge')
+    @app.cli.command()
     @click.option('--category', default=10, help='Quantity of category. default is 10.')
     @click.option('--post', default=50, help='Quantity of post, default is 50.')
     @click.option('--comment', default=500, help='Quantity of comment, default is 500.')
@@ -129,8 +129,8 @@ def register_commends(app=None):
 
         click.echo('Done!')
 
-    @app.cli.command(name='init')
-    @click.option('--username', prompt=True, help='Quantity of user for login')
+    @app.cli.command()
+    @click.option('--username', prompt=True, help='Quantity of username for login')
     @click.option('--password', prompt=True, hide_input=True, confirmation_prompt=True,
                   help='Quantity of user\'s password for login')
     def init(username, password):
@@ -138,9 +138,11 @@ def register_commends(app=None):
 
         admin = Admin.query.first()
         if admin:
+            click.echo('Updating the user to Superuser...')
             admin.username = username
             admin.password = password
         else:
+            click.echo('Creating the Superuser...')
             admin = Admin(username=username, blog_title='Blog', blog_sub_title='你的博客.', name='Admin',
                           about='Anything about you.')
             admin.password = password
