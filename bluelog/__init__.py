@@ -3,8 +3,8 @@ import os
 import click
 from flask import Flask, render_template
 from flask_login import current_user
-from flask_wtf.csrf import CSRFError
 
+from bluelog.blueprints import *
 from bluelog.extensions import db, mail, moment, bootstrap, ckeditor, migrate, login_manager, csrf
 from bluelog.models import Admin, Category, Comment, Post, Link
 from bluelog.settings import config
@@ -44,9 +44,6 @@ def register_extensions(app=None):
 
 
 def register_blueprints(app=None):
-    from bluelog.blueprints.admin import admin_bp
-    from bluelog.blueprints.auth import auth_bp
-    from bluelog.blueprints.blog import blog_bp
     app.register_blueprint(blog_bp)
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(auth_bp, url_prefix='/auth')
@@ -74,20 +71,16 @@ def register_template_context(app=None):
 
 def register_errors(app=None):
     @app.errorhandler(400)
-    def bad_required(_):
-        return render_template('error/400.html'), 400
+    def bad_required(e):
+        return render_template('error/error.html', code=e.code, name=e.name, description=e.description), 400
 
     @app.errorhandler(404)
-    def not_found(_):
-        return render_template('error/404.html'), 404
+    def not_found(e):
+        return render_template('error/error.html', code=e.code, name=e.name, description=e.description), 404
 
     @app.errorhandler(500)
     def server_error(_):
         return render_template('error/500.html'), 500
-
-    @app.errorhandler(CSRFError)
-    def csrf_error(e):
-        return render_template('error/400.html', descraption=e.description), 400
 
 
 def register_commends(app=None):
@@ -96,9 +89,9 @@ def register_commends(app=None):
     def init_db(drop):
         """Initialize the database."""
         if drop:
-            click.confirm('This operation will delete the database, do you want to continue?', abort=True)
+            click.confirm('All data well be delete, do you want to continue?', abort=True)
             db.drop_all()
-            click.echo('Drop tables.')
+            click.echo('Database has been emptied.')
         db.create_all()
         click.echo('Initialized database.')
 
@@ -138,12 +131,12 @@ def register_commends(app=None):
 
         admin = Admin.query.first()
         if admin:
-            click.echo('Updating the user to Superuser...')
+            click.echo('Updating user to Superuser...')
             admin.username = username
             admin.password = password
         else:
             click.echo('Creating the Superuser...')
-            admin = Admin(username=username, blog_title='Blog', blog_sub_title='你的博客.', name='Admin',
+            admin = Admin(username=username, blog_title='Bluelog', blog_sub_title='你的博客.', name='Admin',
                           about='Anything about you.')
             admin.password = password
             db.session.add(admin)
